@@ -1,3 +1,17 @@
+/*
+Interrupt based UART RX code.
+Based on character received interrupt
+
+pros:
+ * shorter rx_buffer
+ * more verbose implementation that might be easier to follow
+ * unit testable
+cons:
+ * ~150 interrupts per message - higher CPU usage, especially
+   factoring in interrupt overhead
+ * more code, a lot of manual coding
+*/
+
 constexpr uint8_t MARK_START = 0xFF;
 constexpr uint8_t MARK_END = 0xFE;
 constexpr uint8_t MARK_ESC = 0xFD;
