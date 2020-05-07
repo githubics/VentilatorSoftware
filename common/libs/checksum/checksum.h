@@ -31,6 +31,8 @@ limitations under the License.
 uint16_t checksum_fletcher16(const char *data, uint8_t count,
                              uint16_t state = 0);
 
+uint32_t crc32(const char *data, uint32_t count);
+
 // Computes check bytes for a fletcher16 checksum.
 //
 // Given a packet p and checksum(p) == c, check_bytes_fletcher16(c) returns two
