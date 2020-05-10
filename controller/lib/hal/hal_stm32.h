@@ -232,14 +232,37 @@ struct DMA_Regs {
   REG intStat; // interrupt status register
   REG intClr;  // interrupt flag clear register
   struct {
-    REG config; // channel x configuration register
+    struct {
+      REG rsvd : 17;
+      REG mem2mem : 1;  // memory-to-memory mode
+      REG priority : 2; // priority level 0b00 - low, 0b11 - high
+      REG msize : 2;    // memory size 0b00 - 8bits, 0b10 - 32bits
+      REG psize : 2;    // peripheral size 0b00 - 8bits, 0b10 - 32bits
+      REG memInc : 1;   // memory increment mode
+      REG perInc : 1;   // peripheral increment mode
+      REG circular : 1; // circular mode
+      REG dir : 1;      // data xfer direction 0: per->mem, 1: mem->per
+      REG teie : 1;     // transfer error interrupt enable
+      REG htie : 1;     // half transfer interrupt enable
+      REG tcie : 1;     // transfer complete interrupt enable
+      REG enable : 1;   // channel enable
+    } config;           // channel x configuration register
     REG count;  // channel x number of data to transfer register
     REG pAddr;  // channel x peripheral address register
     REG mAddr;  // channel x memory address register
     REG rsvd;   // reserved
   } channel[7];
   REG rsvd[5]; // reserved
-  REG chanSel; // channel selection register
+  struct {
+    REG rsvd : 4;
+    REG c7s : 4;
+    REG c6s : 4;
+    REG c5s : 4;
+    REG c4s : 4;
+    REG c3s : 4;
+    REG c2s : 4;
+    REG c1s : 4;
+  } chanSel; // channel selection register
 };
 inline DMA_Regs *const DMA1_BASE = reinterpret_cast<DMA_Regs *>(0x40020000);
 inline DMA_Regs *const DMA2_BASE = reinterpret_cast<DMA_Regs *>(0x40020400);
