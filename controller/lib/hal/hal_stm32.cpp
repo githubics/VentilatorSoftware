@@ -52,6 +52,7 @@ static void EnableClock(void *ptr);
 static void EnableInterrupt(int addr, int pri);
 static void Timer6ISR();
 static void UART3_ISR();
+static void DMA1_CH2_ISR();
 
 // For now, the main function in main.cpp is called setup
 // rather then main.  If we adopt this HAL then we can
@@ -857,7 +858,7 @@ __attribute__((section(".isr_vector"))) void (*const vectors[101])() = {
     BadISR,        //  12 - 0x030 Debug monitor handler
     BadISR,        //  13 - 0x034 Reserved
     BadISR,        //  14 - 0x038 The PendSV handler
-    BadISR,        //  15 - 0x03C
+    BadISR,        //  15 - 0x03C SysTick
     BadISR,        //  16 - 0x040
     BadISR,        //  17 - 0x044
     BadISR,        //  18 - 0x048
@@ -870,7 +871,7 @@ __attribute__((section(".isr_vector"))) void (*const vectors[101])() = {
     BadISR,        //  25 - 0x064
     BadISR,        //  26 - 0x068
     BadISR,        //  27 - 0x06C
-    BadISR,        //  28 - 0x070
+    DMA1_CH2_ISR,  //  28 - 0x070 DMA1_CH2
     BadISR,        //  29 - 0x074
     BadISR,        //  30 - 0x078
     BadISR,        //  31 - 0x07C
