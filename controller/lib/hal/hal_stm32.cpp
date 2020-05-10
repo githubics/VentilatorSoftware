@@ -51,8 +51,9 @@ static void InitUARTs();
 static void EnableClock(void *ptr);
 static void EnableInterrupt(int addr, int pri);
 static void Timer6ISR();
-static void UART3_ISR();
-static void DMA1_CH2_ISR();
+void UART3_ISR();
+void DMA1_CH2_ISR();
+void DMA1_CH3_ISR();
 
 // For now, the main function in main.cpp is called setup
 // rather then main.  If we adopt this HAL then we can
@@ -621,6 +622,7 @@ static void InitUARTs() {
 
 static void UART2_ISR() { dbgUART.ISR(); }
 static void UART3_ISR() { rpUART.ISR(); }
+// static void UART3_ISR() { rpUART.ISR(); }
 
 uint16_t HalApi::serialRead(char *buf, uint16_t len) {
   return rpUART.read(buf, len);
@@ -871,8 +873,8 @@ __attribute__((section(".isr_vector"))) void (*const vectors[101])() = {
     BadISR,        //  25 - 0x064
     BadISR,        //  26 - 0x068
     BadISR,        //  27 - 0x06C
-    DMA1_CH2_ISR,  //  28 - 0x070 DMA1_CH2
-    BadISR,        //  29 - 0x074
+    DMA1_CH2_ISR,  //  28 - 0x070 DMA1 CH2
+    DMA1_CH3_ISR,  //  29 - 0x074 DMA1 CH3
     BadISR,        //  30 - 0x078
     BadISR,        //  31 - 0x07C
     BadISR,        //  32 - 0x080
