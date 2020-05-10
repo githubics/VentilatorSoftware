@@ -228,21 +228,21 @@ struct FlashReg {
 };
 inline FlashReg *const FLASH_BASE = reinterpret_cast<FlashReg *>(0x40022000);
 
-struct DMA_Reg {
-  REG intStat;
-  REG intClr;
+struct DMA_Regs {
+  REG intStat; // interrupt status register
+  REG intClr;  // interrupt flag clear register
   struct {
-    REG config;
-    REG count;
-    REG pAddr;
-    REG mAddr;
-    REG rsvd;
+    REG config; // channel x configuration register
+    REG count;  // channel x number of data to transfer register
+    REG pAddr;  // channel x peripheral address register
+    REG mAddr;  // channel x memory address register
+    REG rsvd;   // reserved
   } channel[7];
-  REG rsvd[5];
-  REG chanSel;
+  REG rsvd[5]; // reserved
+  REG chanSel; // channel selection register
 };
-inline DMA_Reg *const DMA1_BASE = reinterpret_cast<DMA_Reg *>(0x40020000);
-inline DMA_Reg *const DMA2_BASE = reinterpret_cast<DMA_Reg *>(0x40020400);
+inline DMA_Regs *const DMA1_BASE = reinterpret_cast<DMA_Regs *>(0x40020000);
+inline DMA_Regs *const DMA2_BASE = reinterpret_cast<DMA_Regs *>(0x40020400);
 
 struct SPI_Regs {
   REG ctrl[2];
