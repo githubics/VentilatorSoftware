@@ -128,6 +128,80 @@ inline IntCtrl_Regs *const NVIC_BASE =
     reinterpret_cast<IntCtrl_Regs *>(0xE000E100);
 
 struct UART_Regs {
+  struct {
+    REG rsvd : 3;
+    REG m1 : 1;     // Word length 1
+    REG eobie : 1;  // End of Block interrupt enable
+    REG rtoie : 1;  // Receiver timeout interrupt enable
+    REG deat : 5;   // Driver Enable assertion time
+    REG dedt : 5;   // Driver Enable de-assertion time
+    REG over8 : 1;  // Oversampling mode
+    REG cmie : 1;   // Character match interrupt enable
+    REG mme : 1;    // Mute mode enable
+    REG m0 : 1;     // Word length 0
+    REG wake : 1;   // Receiver wakeup method
+    REG pce : 1;    // Parity control enable
+    REG ps : 1;     // Parity selection
+    REG peie : 1;   // Parity Error interrupt enable
+    REG txeie : 1;  // Transmit interrupt enable
+    REG tcie : 1;   // Transmission complete interrupt enable
+    REG rxneie : 1; // RXNE interrupt enable
+    REG idleie : 1; // IDLE interrupt enable
+    REG te : 1;     // Transmitter enable
+    REG re : 1;     // Receiver enable
+    REG uesm : 1;   // USART enable in Stop mode
+    REG ue : 1;     // USART enable
+  } ctrl1;
+  struct {
+    REG addr : 8;     // used for character detection during normal reception
+                      // This bit field can only be written when reception is
+                      // disabled (RE = 0) or the USART is disabled (UE=0)
+    REG rtoen : 1;    // Receiver timeout enable
+    REG abrmod : 2;   // Auto baud rate mode
+    REG abren : 1;    // Auto baud rate enable
+    REG msbfirst : 1; // Most significant bit first
+    REG datainv : 1;  // Binary data inversion
+    REG txinv : 1;    // TX pin active level inversion
+    REG rxinv : 1;    // RX pin active level inversion
+    REG swap : 1;     // Swap TX/RX pins
+    REG linen : 1;    // LIN mode enable
+    REG stop : 2;     // STOP bits
+    REG clken : 1;    // Clock enable
+    REG cpol : 1;     // Clock polarity
+    REG cpha : 1;     // Clock phase
+    REG lbcl : 1;     // Last bit clock pulse
+    REG rsvd1 : 1;
+    REG lbdie : 1; // LIN break detection interrupt enable
+    REG lbdl : 1;  // LIN break detection length
+    REG addm7 : 1; // 7-bit Address Detection/4-bit Address Detection
+    REG rsvd2 : 4;
+  } ctrl2;
+  struct {
+    REG rsvd : 7;
+    REG tcbgtie : 1; // Transmission complete before guard time interrupt enable
+    REG ucesm : 1;   // USART Clock Enable in Stop mode.
+    REG wufie : 1;   // Wakeup from Stop mode interrupt enable
+    REG wus : 2;     // Wakeup from Stop mode interrupt flag selection
+    REG scarcnt : 2; // Smartcard auto-retry count
+    REG rsvd2 : 1;
+    REG dep : 1;    // Driver enable polarity selection
+    REG dem : 1;    // Driver enable mode
+    REG ddre : 1;   // DMA Disable on Reception Error
+    REG ovrdis : 1; // Overrun Disable
+    REG onebit : 1; // One sample bit method enable
+    REG ctsie : 1;  // CTS interrupt enable
+    REG ctse : 1;   // CTS enable
+    REG rtse : 1;   // RTS enable
+    REG dmat : 1;   // DMA enable transmitter
+    REG dmar : 1;   // DMA enable receiver
+    REG scen : 1;   // Smartcard mode enable
+    REG nack : 1;   // Smartcard NACK enable
+    REG hdsel : 1;  // Half-duplex selection
+    REG irlp : 1;   // IrDA low-power
+    REG iren : 1;   // IrDA mode enable
+    REG eie : 1;    // Error interrupt enable
+  } ctrl3;
+
   REG ctrl[3];
   REG baud;
   REG guard;

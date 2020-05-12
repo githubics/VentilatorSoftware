@@ -500,8 +500,10 @@ public:
     // Set baud rate register
     reg->baud = CPU_FREQ / baud;
 
-    // Enable the UART and receive interrupts
-    reg->ctrl[0] = 0x002D;
+    reg->ctrl1.rxneie = 1; // enable receive interrupt
+    reg->ctrl1.te = 1;     // enable transmitter
+    reg->ctrl1.re = 1;     // enable receiver
+    reg->ctrl1.ue = 1;     // enable uart
   }
 
   // This is the interrupt handler for the UART.
@@ -523,9 +525,11 @@ public:
       // If there's nothing left in the transmit buffer,
       // just disable further transmit interrupts.
       if (ch < 0) {
-        reg->ctrl[0] &= ~0x0080;
-      } else {
-        // Otherwise, Send the next byte
+        reg->ctrl1.txeie = 0;
+      }
+
+      // Otherwise, Send the next byte
+      else
         reg->txDat = ch;
       }
     }
@@ -563,7 +567,7 @@ public:
     // Enable the tx interrupt.  If there was already anything
     // in the buffer this will already be enabled, but enabling
     // it again doesn't hurt anything.
-    reg->ctrl[0] |= 0x0080;
+    reg->ctrl1.txeie = 1;
 
     return i;
   }
