@@ -304,7 +304,38 @@ struct FlashReg {
 inline FlashReg *const FLASH_BASE = reinterpret_cast<FlashReg *>(0x40022000);
 
 struct DMA_Regs {
-  REG intStat; // interrupt status register
+  struct {
+    REG rsvd : 4;
+    REG teif7 : 1; // transfer error (TE) flag
+    REG htif7 : 1; // half transfer (HT) flag
+    REG tcif7 : 1; // transfer complete (TC) flag
+    REG gif7 : 1;  // global interrupt flag
+    REG teif6 : 1; // transfer error (TE) flag
+    REG htif6 : 1; // half transfer (HT) flag
+    REG tcif6 : 1; // transfer complete (TC) flag
+    REG gif6 : 1;  // global interrupt flag
+    REG teif5 : 1; // transfer error (TE) flag
+    REG htif5 : 1; // half transfer (HT) flag
+    REG tcif5 : 1; // transfer complete (TC) flag
+    REG gif5 : 1;  // global interrupt flag
+    REG teif4 : 1; // transfer error (TE) flag
+    REG htif4 : 1; // half transfer (HT) flag
+    REG tcif4 : 1; // transfer complete (TC) flag
+    REG gif4 : 1;  // global interrupt flag
+    REG teif3 : 1; // transfer error (TE) flag
+    REG htif3 : 1; // half transfer (HT) flag
+    REG tcif3 : 1; // transfer complete (TC) flag
+    REG gif3 : 1;  // global interrupt flag
+    REG teif2 : 1; // transfer error (TE) flag
+    REG htif2 : 1; // half transfer (HT) flag
+    REG tcif2 : 1; // transfer complete (TC) flag
+    REG gif2 : 1;  // global interrupt flag
+    REG teif1 : 1; // transfer error (TE) flag
+    REG htif1 : 1; // half transfer (HT) flag
+    REG tcif1 : 1; // transfer complete (TC) flag
+    REG gif1 : 1;  // global interrupt flag
+  } intStat;       // interrupt status register
+
   REG intClr;  // interrupt flag clear register
   struct {
     struct {
