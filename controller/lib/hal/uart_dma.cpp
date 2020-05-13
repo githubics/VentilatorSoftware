@@ -1,3 +1,5 @@
+#if defined(BARE_STM32)
+
 #include "hal_stm32.h"
 
 // STM32 UART3 driver based on DMA transfers.
@@ -225,3 +227,5 @@ void UART3_ISR() {
     dmaUart.onRxCharacterMatch();
   }
 }
+
+#endif

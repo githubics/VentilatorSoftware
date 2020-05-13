@@ -625,7 +625,6 @@ static void InitUARTs() {
 }
 
 static void UART2_ISR() { dbgUART.ISR(); }
-static void UART3_ISR() { rpUART.ISR(); }
 // static void UART3_ISR() { rpUART.ISR(); }
 
 uint16_t HalApi::serialRead(char *buf, uint16_t len) {
