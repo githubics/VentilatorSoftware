@@ -52,6 +52,10 @@ public:
     uart->ctrl[0] = 0x000D;
 
     // TODO Enable Hardware flow controll
+    // TODO Enable receiver timeout
+    // ctrl2.rtoen = 1
+    // timeout register = timeout time
+    // TODO enable parity checking
   }
 
   // Returns true if DMA TX is in progress
@@ -84,18 +88,18 @@ public:
     dma->channel[1].config.memInc = 1;      // increment source (memory) address
     dma->channel[1].config.perInc = 0;      // don't increment dest (peripheral)
                                             // address
-    dma->channel[1].config.circular = 0; // not circular
-    dma->channel[1].config.dir = 1;      // memory to peripheral
-    dma->channel[1].config.teie = 1;     // interrupt on error
-    dma->channel[1].config.htie = 0;     // no half-transfer interrupt
-    dma->channel[1].config.tcie = 1;     // DMA complete interrupt enabled
-    dma->channel[1].config.enable = 0;   // don't enable yet
+    dma->channel[1].config.circular = 0;    // not circular
+    dma->channel[1].config.dir = 1;         // memory to peripheral
+    dma->channel[1].config.teie = 1;        // interrupt on error
+    dma->channel[1].config.htie = 0;        // no half-transfer interrupt
+    dma->channel[1].config.tcie = 1;        // DMA complete interrupt enabled
+    dma->channel[1].config.enable = 0;      // don't enable yet
 
     dma->channel[1].count = length;
     dma->channel[1].pAddr = reinterpret_cast<REG>(&(uart->txDat));
     dma->channel[1].mAddr = reinterpret_cast<REG>(buf);
 
-    uart->ctrl[2] |= 0x0080;  // set DMAT bit to enable DMA for transmitter
+    uart->ctrl3.dmat = 1;     // set DMAT bit to enable DMA for transmitter
     uart->intClear |= 0x0040; // Clear transmit complete flag
     dma->channel[1].config.enable = 1; // go!
 
@@ -122,19 +126,21 @@ public:
     dma->channel[2].config.memInc = 1;      // increment destination (memory)
     dma->channel[2].config.perInc = 0;      // don't increment source
                                             // (peripheral) address
-    dma->channel[2].config.circular = 0; // not circular
-    dma->channel[2].config.dir = 0;      // peripheral to memory
-    dma->channel[2].config.teie = 1;     // interrupt on error
-    dma->channel[2].config.htie = 0;     // no half-transfer interrupt
-    dma->channel[2].config.tcie = 1;     // interrupt on DMA complete
-    dma->channel[2].config.enable = 0;   // don't enable yet
+    dma->channel[2].config.circular = 0;    // not circular
+    dma->channel[2].config.dir = 0;         // peripheral to memory
+    dma->channel[2].config.teie = 1;        // interrupt on error
+    dma->channel[2].config.htie = 0;        // no half-transfer interrupt
+    dma->channel[2].config.tcie = 1;        // interrupt on DMA complete
+    dma->channel[2].config.enable = 0;      // don't enable yet
 
     dma->channel[2].count = length;
     dma->channel[2].pAddr = reinterpret_cast<REG>(buf);
     dma->channel[2].mAddr = reinterpret_cast<REG>(&(uart->txDat));
 
-    uart->ctrl[2] |= 0x0040; // set DMAR bit to enable DMA for receiver
+    uart->ctrl3.dmar = 1;    // set DMAR bit to enable DMA for receiver
     uart->request |= 0x0008; // Clear RXNE flag
+
+    // TODO ctrl3.ddre - handle errors during DMA transfer
     dma->channel[2].config.enable = 1; // go!
 
     rx_in_progress = true;
@@ -152,11 +158,11 @@ public:
 
   // Sets up an interrupt on matching char incomming form UART3
   void interruptOnChar(char c) {
-    uart->ctrl[0] =
-        0x0008; // TODO Disable reader in order to enable characted detection
-                //    uart->ctrl[1].addr = stopChar; // TODO
-    uart->ctrl[0] = 0x000D; // TODO enable receiver and Character match
-                            // interrupt
+    uart->ctrl1.re = 0; // Disable receiver in order to enable
+                        // characted detection
+    uart->ctrl2.addr = c;
+    uart->ctrl1.cmie = 1; // Enable character match interrupt
+    uart->ctrl1.re = 1;   // Enable receiver
   }
 
   // called from DMA1_CH3_ISR

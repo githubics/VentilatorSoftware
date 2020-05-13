@@ -275,6 +275,7 @@ struct TimerRegs {
   REG opt2;
   REG opt3;
 };
+
 inline TimerRegs *const TIMER1_BASE = reinterpret_cast<TimerRegs *>(0x40012C00);
 inline TimerRegs *const TIMER2_BASE = reinterpret_cast<TimerRegs *>(0x40000000);
 inline TimerRegs *const TIMER3_BASE = reinterpret_cast<TimerRegs *>(0x40000400);
@@ -321,10 +322,10 @@ struct DMA_Regs {
       REG tcie : 1;     // transfer complete interrupt enable
       REG enable : 1;   // channel enable
     } config;           // channel x configuration register
-    REG count;  // channel x number of data to transfer register
-    REG pAddr;  // channel x peripheral address register
-    REG mAddr;  // channel x memory address register
-    REG rsvd;   // reserved
+    REG count;          // channel x number of data to transfer register
+    REG pAddr;          // channel x peripheral address register
+    REG mAddr;          // channel x memory address register
+    REG rsvd;           // reserved
   } channel[7];
   REG rsvd[5]; // reserved
   struct {
