@@ -216,6 +216,7 @@ public:
   // Serial port used for debugging
   uint16_t debugWrite(const char *buf, uint16_t len);
   uint16_t debugRead(char *buf, uint16_t len);
+  uint16_t debugBytesAvailableForWrite();
 
 #ifndef TEST_MODE
   // Translates to a numeric pin that can be passed to the Arduino API.
@@ -444,10 +445,12 @@ inline uint16_t HalApi::serialBytesAvailableForWrite() {
 
 // No implementation of debugRead/Write on Nucleo because the Arduino API
 // doesn't expose a separate debug serial port.
+// Debug stuff not supported because this platform is being removed
 inline uint16_t HalApi::debugWrite(const char *buf, uint16_t len) {
   return len;
 }
 inline uint16_t HalApi::debugRead(char *buf, uint16_t len) { return 0; }
+inline uint16_t HalApi::debugBytesAvailableForWrite() { return 0; }
 
 inline void HalApi::watchdog_init() {
   // Our only user of the Arduino API is Nucleo, i.e. STM32 using Arduino APIs.
@@ -601,6 +604,8 @@ inline uint16_t HalApi::debugWrite(const char *buf, uint16_t len) {
   return len;
 }
 inline uint16_t HalApi::debugRead(char *buf, uint16_t len) { return 0; }
+
+inline uint16_t HalApi::debugBytesAvailableForWrite() { return 0; }
 
 #endif
 
