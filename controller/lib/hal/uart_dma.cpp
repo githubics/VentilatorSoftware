@@ -27,6 +27,10 @@ public:
   virtual void onTxComplete() = 0;
   // Called on specified character reception
   virtual void onCharacterMatch() = 0;
+  // Called on RX errors
+  virtual void onRxError() = 0;
+  // Called on TX errors
+  virtual void onTxError() = 0;
 };
 
 class UART3_DMA {
@@ -50,13 +54,14 @@ public:
   void init(int baud) {
     // Set baud rate register
     uart->baud = CPU_FREQ / baud;
-    // Enable the UART tx and rx
-    uart->ctrl[0] = 0x000D;
+
+    uart->ctrl3.dmar = 1; // set DMAR bit to enable DMA for receiver
+    uart->ctrl3.dmat = 1; // set DMAT bit to enable DMA for transmitter
+    uart->ctrl1.te = 1;   // enable transmitter
+    uart->ctrl1.re = 1;   // enable receiver
+    uart->ctrl1.ue = 1;   // enable uart
 
     // TODO Enable Hardware flow controll
-    // TODO Enable receiver timeout
-    // ctrl2.rtoen = 1
-    // timeout register = timeout time
     // TODO enable parity checking
   }
 
@@ -101,8 +106,7 @@ public:
     dma->channel[1].pAddr = reinterpret_cast<REG>(&(uart->txDat));
     dma->channel[1].mAddr = reinterpret_cast<REG>(buf);
 
-    uart->ctrl3.dmat = 1;     // set DMAT bit to enable DMA for transmitter
-    uart->intClear |= 0x0040; // Clear transmit complete flag
+    uart->intClear |= (1 << 6);        // Clear transmit complete flag
     dma->channel[1].config.enable = 1; // go!
 
     tx_in_progress = true;
@@ -110,15 +114,28 @@ public:
     return true;
   }
 
-  // Sets up reception of at least [length] chars from UART3 into [buf]
-  // Returns false if reception is in progress, new reception is not
-  // setup. Returns true if no reception is in progress.
+  void stopTX() {
+    if (isTxInProgress()) {
+      dma->channel[1].config.enable = 0;
+      // TODO thread safety
+      tx_in_progress = 0;
+    }
+  }
 
-  bool startRX(const char *buf, const uint32_t length) {
+  // Sets up reception of at least [length] chars from UART3 into [buf]
+  // [timeout] is the number of baudrate bits for which RX line is
+  // allowed to be idle before asserting timeout error.
+  // Returns false if reception is in progress, new reception is not
+  // setup. Returns true if no reception is in progress and new reception
+  // was setup.
+
+  bool startRX(const char *buf, const uint32_t length, uint32_t timeout) {
     // UART3 reception happens on DMA1 channel 3
     if (isRxInProgress()) {
       return false;
     }
+    // max timeout is 24 bit
+    timeout = timeout & 0x00FFFFFF;
 
     dma->chanSel.c2s = 0b0011;
     dma->channel[2].config.mem2mem = 0;
@@ -139,10 +156,12 @@ public:
     dma->channel[2].pAddr = reinterpret_cast<REG>(buf);
     dma->channel[2].mAddr = reinterpret_cast<REG>(&(uart->txDat));
 
-    uart->ctrl3.dmar = 1;    // set DMAR bit to enable DMA for receiver
-    uart->request |= 0x0008; // Clear RXNE flag
+    uart->request |= (1 << 3); // Clear RXNE flag
 
-    // TODO ctrl3.ddre - handle errors during DMA transfer
+    uart->ctrl3.ddre = 1;  // DMA is disabled following a reception error
+    uart->ctrl2.rtoen = 1; // Enable receive timeout interrupt
+    uart->timeout = timeout;
+
     dma->channel[2].config.enable = 1; // go!
 
     rx_in_progress = true;
@@ -152,7 +171,8 @@ public:
 
   void stopRX() {
     if (isRxInProgress()) {
-      dma->channel[1].config.enable = 0;
+      uart->ctrl2.rtoen = 0; // Disable receive timeout interrupt
+      dma->channel[2].config.enable = 0;
       // TODO thread safety
       rx_in_progress = 0;
     }
@@ -185,43 +205,85 @@ public:
 
   // called from UART3_ISR
   void onRxCharacterMatch() {
-    // TODO disable interrupt
+    uart->ctrl1.re = 0;   // Disable receiver in order to disable
+                          // characted detection
+    uart->ctrl1.cmie = 0; // Enable character match interrupt
+    uart->ctrl1.re = 1;   // Enable receiver
     eventListener.onCharacterMatch();
+  }
+
+  void onDmaRxError() {
+    // TODO clear error flags
+    stopRX();
+    eventListener.onRxError();
+  }
+
+  void onDmaTxError() {
+    // TODO clear error flags
+    stopTX();
+    eventListener.onTxError();
+  }
+
+  void onUartRxError() {
+    stopRX();
+    eventListener.onRxError();
   }
 };
 
 class DummyListener : public UART_DMA_Listener {
 public:
-  // Called on DMA RX complete
   void onRxComplete() {}
-  // Called on DMA TX complete
   void onTxComplete() {}
-  // Called on specified character reception
   void onCharacterMatch() {}
+  void onRxError(){};
+  void onTxError(){};
 };
 
 DummyListener listener = DummyListener();
 UART3_DMA dmaUart = UART3_DMA(listener);
 
-void DMA1_CH2_ISR() { dmaUart.onDmaTxComplete(); }
+void DMA1_CH2_ISR() {
+  DMA_Regs *const dma = DMA1_BASE;
+  if (dma->intStat.teif2) {
+    dmaUart.onDmaTxError();
+  } else {
+    dmaUart.onDmaTxComplete();
+  }
+}
 
-void DMA1_CH3_ISR() { dmaUart.onDmaRxComplete(); }
+void DMA1_CH3_ISR() {
+  DMA_Regs *const dma = DMA1_BASE;
+  if (dma->intStat.teif3) {
+    dmaUart.onDmaRxError();
+  } else {
+    dmaUart.onDmaRxComplete();
+  }
+}
 
 inline bool isCharacterMatchInterrupt() {
-  // TODO
-  // UART_Regs *reg = UART3_BASE;
-  return false;
+  UART_Regs *const uart = UART3_BASE;
+  return 0 != (uart->status & (1 << 17));
+}
+
+inline bool isRxError() {
+  UART_Regs *const uart = UART3_BASE;
+
+  return 0 != (uart->status & (1 << 11)) || // RTOF - Receiver timeout
+         0 != (uart->status & (1 << 3)) ||  // ORE - Overrun error
+         0 != (uart->status & (1 << 1));    // FE - frame error
+
+  // 0 != uart->status & (1 << 0)  || // PE - parity error
+  // 0 != uart->status & (1 << 2)  || // START bit Noise detection flag
 }
 
 // This is the interrupt handler for the UART.
 void UART3_ISR() {
-  // Check for over run error and framing errors.
-  // Clear those errors if they're set to avoid
-  // further interrupts from them.
-
-  UART_Regs *reg = UART3_BASE;
-  if (reg->status & 0x000A)
-    reg->intClear = 0x000A;
+  UART_Regs *const uart = UART3_BASE;
+  if (isRxError()) {
+    uart->request |= (1 << 3); // Clear RXNE flag before clearing other flags
+    uart->intClear = (1 << 11) | (1 << 3) | (1 << 1); // Clear interrupt flags
+    dmaUart.onUartRxError();
+  }
 
   if (isCharacterMatchInterrupt()) {
     dmaUart.onRxCharacterMatch();

@@ -336,7 +336,7 @@ struct DMA_Regs {
     REG gif1 : 1;  // global interrupt flag
   } intStat;       // interrupt status register
 
-  REG intClr;  // interrupt flag clear register
+  REG intClr; // interrupt flag clear register
   struct {
     struct {
       REG rsvd : 17;
