@@ -128,81 +128,89 @@ inline IntCtrl_Regs *const NVIC_BASE =
     reinterpret_cast<IntCtrl_Regs *>(0xE000E100);
 
 struct UART_Regs {
-  struct {
-    REG rsvd : 3;
-    REG m1 : 1;     // Word length 1
-    REG eobie : 1;  // End of Block interrupt enable
-    REG rtoie : 1;  // Receiver timeout interrupt enable
-    REG deat : 5;   // Driver Enable assertion time
-    REG dedt : 5;   // Driver Enable de-assertion time
-    REG over8 : 1;  // Oversampling mode
-    REG cmie : 1;   // Character match interrupt enable
-    REG mme : 1;    // Mute mode enable
-    REG m0 : 1;     // Word length 0
-    REG wake : 1;   // Receiver wakeup method
-    REG pce : 1;    // Parity control enable
-    REG ps : 1;     // Parity selection
-    REG peie : 1;   // Parity Error interrupt enable
-    REG txeie : 1;  // Transmit interrupt enable
-    REG tcie : 1;   // Transmission complete interrupt enable
-    REG rxneie : 1; // RXNE interrupt enable
-    REG idleie : 1; // IDLE interrupt enable
-    REG te : 1;     // Transmitter enable
-    REG re : 1;     // Receiver enable
-    REG uesm : 1;   // USART enable in Stop mode
-    REG ue : 1;     // USART enable
+  union {
+    struct {
+      REG ue : 1;     // USART enable
+      REG uesm : 1;   // USART enable in Stop mode
+      REG re : 1;     // Receiver enable
+      REG te : 1;     // Transmitter enable
+      REG idleie : 1; // IDLE interrupt enable
+      REG rxneie : 1; // RXNE interrupt enable
+      REG tcie : 1;   // Transmission complete interrupt enable
+      REG txeie : 1;  // Transmit interrupt enable
+      REG peie : 1;   // Parity Error interrupt enable
+      REG ps : 1;     // Parity selection
+      REG pce : 1;    // Parity control enable
+      REG wake : 1;   // Receiver wakeup method
+      REG m0 : 1;     // Word length 0
+      REG mme : 1;    // Mute mode enable
+      REG cmie : 1;   // Character match interrupt enable
+      REG over8 : 1;  // Oversampling mode
+      REG dedt : 5;   // Driver Enable de-assertion time
+      REG deat : 5;   // Driver Enable assertion time
+      REG rtoie : 1;  // Receiver timeout interrupt enable
+      REG eobie : 1;  // End of Block interrupt enable
+      REG m1 : 1;     // Word length 1
+      REG rsvd : 3;
+    } s;
+    REG r;
   } ctrl1;
-  struct {
-    REG addr : 8;     // used for character detection during normal reception
-                      // This bit field can only be written when reception is
-                      // disabled (RE = 0) or the USART is disabled (UE=0)
-    REG rtoen : 1;    // Receiver timeout enable
-    REG abrmod : 2;   // Auto baud rate mode
-    REG abren : 1;    // Auto baud rate enable
-    REG msbfirst : 1; // Most significant bit first
-    REG datainv : 1;  // Binary data inversion
-    REG txinv : 1;    // TX pin active level inversion
-    REG rxinv : 1;    // RX pin active level inversion
-    REG swap : 1;     // Swap TX/RX pins
-    REG linen : 1;    // LIN mode enable
-    REG stop : 2;     // STOP bits
-    REG clken : 1;    // Clock enable
-    REG cpol : 1;     // Clock polarity
-    REG cpha : 1;     // Clock phase
-    REG lbcl : 1;     // Last bit clock pulse
-    REG rsvd1 : 1;
-    REG lbdie : 1; // LIN break detection interrupt enable
-    REG lbdl : 1;  // LIN break detection length
-    REG addm7 : 1; // 7-bit Address Detection/4-bit Address Detection
-    REG rsvd2 : 4;
+  union {
+    struct {
+      REG rsvd2 : 4;
+      REG addm7 : 1; // 7-bit Address Detection/4-bit Address Detection
+      REG lbdl : 1;  // LIN break detection length
+      REG lbdie : 1; // LIN break detection interrupt enable
+      REG rsvd1 : 1;
+      REG lbcl : 1;     // Last bit clock pulse
+      REG cpha : 1;     // Clock phase
+      REG cpol : 1;     // Clock polarity
+      REG clken : 1;    // Clock enable
+      REG stop : 2;     // STOP bits
+      REG linen : 1;    // LIN mode enable
+      REG swap : 1;     // Swap TX/RX pins
+      REG rxinv : 1;    // RX pin active level inversion
+      REG txinv : 1;    // TX pin active level inversion
+      REG datainv : 1;  // Binary data inversion
+      REG msbfirst : 1; // Most significant bit first
+      REG abren : 1;    // Auto baud rate enable
+      REG abrmod : 2;   // Auto baud rate mode
+      REG rtoen : 1;    // Receiver timeout enable
+      REG addr : 8;     // used for character detection during normal reception
+                        // This bit field can only be written when reception is
+                        // disabled (RE = 0) or the USART is disabled (UE=0)
+    } s;
+    REG r;
   } ctrl2;
-  struct {
-    REG rsvd : 7;
-    REG tcbgtie : 1; // Transmission complete before guard time interrupt enable
-    REG ucesm : 1;   // USART Clock Enable in Stop mode.
-    REG wufie : 1;   // Wakeup from Stop mode interrupt enable
-    REG wus : 2;     // Wakeup from Stop mode interrupt flag selection
-    REG scarcnt : 2; // Smartcard auto-retry count
-    REG rsvd2 : 1;
-    REG dep : 1;    // Driver enable polarity selection
-    REG dem : 1;    // Driver enable mode
-    REG ddre : 1;   // DMA Disable on Reception Error
-    REG ovrdis : 1; // Overrun Disable
-    REG onebit : 1; // One sample bit method enable
-    REG ctsie : 1;  // CTS interrupt enable
-    REG ctse : 1;   // CTS enable
-    REG rtse : 1;   // RTS enable
-    REG dmat : 1;   // DMA enable transmitter
-    REG dmar : 1;   // DMA enable receiver
-    REG scen : 1;   // Smartcard mode enable
-    REG nack : 1;   // Smartcard NACK enable
-    REG hdsel : 1;  // Half-duplex selection
-    REG irlp : 1;   // IrDA low-power
-    REG iren : 1;   // IrDA mode enable
-    REG eie : 1;    // Error interrupt enable
+  union {
+    struct {
+      REG eie : 1;    // Error interrupt enable
+      REG iren : 1;   // IrDA mode enable
+      REG irlp : 1;   // IrDA low-power
+      REG hdsel : 1;  // Half-duplex selection
+      REG nack : 1;   // Smartcard NACK enable
+      REG scen : 1;   // Smartcard mode enable
+      REG dmar : 1;   // DMA enable receiver
+      REG dmat : 1;   // DMA enable transmitter
+      REG rtse : 1;   // RTS enable
+      REG ctse : 1;   // CTS enable
+      REG ctsie : 1;  // CTS interrupt enable
+      REG onebit : 1; // One sample bit method enable
+      REG ovrdis : 1; // Overrun Disable
+      REG ddre : 1;   // DMA Disable on Reception Error
+      REG dem : 1;    // Driver enable mode
+      REG dep : 1;    // Driver enable polarity selection
+      REG rsvd2 : 1;
+      REG scarcnt : 2; // Smartcard auto-retry count
+      REG wus : 2;     // Wakeup from Stop mode interrupt flag selection
+      REG wufie : 1;   // Wakeup from Stop mode interrupt enable
+      REG ucesm : 1;   // USART Clock Enable in Stop mode.
+      REG tcbgtie : 1; // Transmission complete before guard time interrupt
+                       // enable
+      REG rsvd : 7;
+    } s;
+    REG r;
   } ctrl3;
-
-  REG ctrl[3];
   REG baud;
   REG guard;
   REG timeout;
@@ -305,53 +313,53 @@ inline FlashReg *const FLASH_BASE = reinterpret_cast<FlashReg *>(0x40022000);
 
 struct DMA_Regs {
   struct {
-    REG rsvd : 4;
-    REG teif7 : 1; // transfer error (TE) flag
-    REG htif7 : 1; // half transfer (HT) flag
-    REG tcif7 : 1; // transfer complete (TC) flag
-    REG gif7 : 1;  // global interrupt flag
-    REG teif6 : 1; // transfer error (TE) flag
-    REG htif6 : 1; // half transfer (HT) flag
-    REG tcif6 : 1; // transfer complete (TC) flag
-    REG gif6 : 1;  // global interrupt flag
-    REG teif5 : 1; // transfer error (TE) flag
-    REG htif5 : 1; // half transfer (HT) flag
-    REG tcif5 : 1; // transfer complete (TC) flag
-    REG gif5 : 1;  // global interrupt flag
-    REG teif4 : 1; // transfer error (TE) flag
-    REG htif4 : 1; // half transfer (HT) flag
-    REG tcif4 : 1; // transfer complete (TC) flag
-    REG gif4 : 1;  // global interrupt flag
-    REG teif3 : 1; // transfer error (TE) flag
-    REG htif3 : 1; // half transfer (HT) flag
-    REG tcif3 : 1; // transfer complete (TC) flag
-    REG gif3 : 1;  // global interrupt flag
-    REG teif2 : 1; // transfer error (TE) flag
-    REG htif2 : 1; // half transfer (HT) flag
-    REG tcif2 : 1; // transfer complete (TC) flag
-    REG gif2 : 1;  // global interrupt flag
-    REG teif1 : 1; // transfer error (TE) flag
-    REG htif1 : 1; // half transfer (HT) flag
-    REG tcif1 : 1; // transfer complete (TC) flag
     REG gif1 : 1;  // global interrupt flag
+    REG tcif1 : 1; // transfer complete (TC) flag
+    REG htif1 : 1; // half transfer (HT) flag
+    REG teif1 : 1; // transfer error (TE) flag
+    REG gif2 : 1;  // global interrupt flag
+    REG tcif2 : 1; // transfer complete (TC) flag
+    REG htif2 : 1; // half transfer (HT) flag
+    REG teif2 : 1; // transfer error (TE) flag
+    REG gif3 : 1;  // global interrupt flag
+    REG tcif3 : 1; // transfer complete (TC) flag
+    REG htif3 : 1; // half transfer (HT) flag
+    REG teif3 : 1; // transfer error (TE) flag
+    REG gif4 : 1;  // global interrupt flag
+    REG tcif4 : 1; // transfer complete (TC) flag
+    REG htif4 : 1; // half transfer (HT) flag
+    REG teif4 : 1; // transfer error (TE) flag
+    REG gif5 : 1;  // global interrupt flag
+    REG tcif5 : 1; // transfer complete (TC) flag
+    REG htif5 : 1; // half transfer (HT) flag
+    REG teif5 : 1; // transfer error (TE) flag
+    REG gif6 : 1;  // global interrupt flag
+    REG tcif6 : 1; // transfer complete (TC) flag
+    REG htif6 : 1; // half transfer (HT) flag
+    REG teif6 : 1; // transfer error (TE) flag
+    REG gif7 : 1;  // global interrupt flag
+    REG tcif7 : 1; // transfer complete (TC) flag
+    REG htif7 : 1; // half transfer (HT) flag
+    REG teif7 : 1; // transfer error (TE) flag
+    REG rsvd : 4;
   } intStat;       // interrupt status register
 
   REG intClr; // interrupt flag clear register
   struct {
     struct {
-      REG rsvd : 17;
-      REG mem2mem : 1;  // memory-to-memory mode
-      REG priority : 2; // priority level 0b00 - low, 0b11 - high
-      REG msize : 2;    // memory size 0b00 - 8bits, 0b10 - 32bits
-      REG psize : 2;    // peripheral size 0b00 - 8bits, 0b10 - 32bits
-      REG memInc : 1;   // memory increment mode
-      REG perInc : 1;   // peripheral increment mode
-      REG circular : 1; // circular mode
-      REG dir : 1;      // data xfer direction 0: per->mem, 1: mem->per
-      REG teie : 1;     // transfer error interrupt enable
-      REG htie : 1;     // half transfer interrupt enable
-      REG tcie : 1;     // transfer complete interrupt enable
       REG enable : 1;   // channel enable
+      REG tcie : 1;     // transfer complete interrupt enable
+      REG htie : 1;     // half transfer interrupt enable
+      REG teie : 1;     // transfer error interrupt enable
+      REG dir : 1;      // data xfer direction 0: per->mem, 1: mem->per
+      REG circular : 1; // circular mode
+      REG perInc : 1;   // peripheral increment mode
+      REG memInc : 1;   // memory increment mode
+      REG psize : 2;    // peripheral size 0b00 - 8bits, 0b10 - 32bits
+      REG msize : 2;    // memory size 0b00 - 8bits, 0b10 - 32bits
+      REG priority : 2; // priority level 0b00 - low, 0b11 - high
+      REG mem2mem : 1;  // memory-to-memory mode
+      REG rsvd : 17;
     } config;           // channel x configuration register
     REG count;          // channel x number of data to transfer register
     REG pAddr;          // channel x peripheral address register
@@ -360,14 +368,14 @@ struct DMA_Regs {
   } channel[7];
   REG rsvd[5]; // reserved
   struct {
-    REG rsvd : 4;
-    REG c7s : 4;
-    REG c6s : 4;
-    REG c5s : 4;
-    REG c4s : 4;
-    REG c3s : 4;
-    REG c2s : 4;
     REG c1s : 4;
+    REG c2s : 4;
+    REG c3s : 4;
+    REG c4s : 4;
+    REG c5s : 4;
+    REG c6s : 4;
+    REG c7s : 4;
+    REG rsvd : 4;
   } chanSel; // channel selection register
 };
 inline DMA_Regs *const DMA1_BASE = reinterpret_cast<DMA_Regs *>(0x40020000);

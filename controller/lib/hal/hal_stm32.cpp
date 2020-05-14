@@ -500,10 +500,10 @@ public:
     // Set baud rate register
     reg->baud = CPU_FREQ / baud;
 
-    reg->ctrl1.rxneie = 1; // enable receive interrupt
-    reg->ctrl1.te = 1;     // enable transmitter
-    reg->ctrl1.re = 1;     // enable receiver
-    reg->ctrl1.ue = 1;     // enable uart
+    reg->ctrl1.s.rxneie = 1; // enable receive interrupt
+    reg->ctrl1.s.te = 1;     // enable transmitter
+    reg->ctrl1.s.re = 1;     // enable receiver
+    reg->ctrl1.s.ue = 1;     // enable uart
   }
 
   // This is the interrupt handler for the UART.
@@ -519,17 +519,17 @@ public:
       rxDat.Put(static_cast<uint8_t>(reg->rxDat));
 
     // Check for transmit data register empty
-    if (reg->status & reg->ctrl[0] & 0x0080) {
+    if (0 != (reg->status & 0x0080 & reg->ctrl1.r)) {
       int ch = txDat.Get();
 
       // If there's nothing left in the transmit buffer,
       // just disable further transmit interrupts.
       if (ch < 0) {
-        reg->ctrl1.txeie = 0;
+        reg->ctrl1.s.txeie = 0;
       }
 
       // Otherwise, Send the next byte
-      else
+      else {
         reg->txDat = ch;
       }
     }
@@ -567,8 +567,7 @@ public:
     // Enable the tx interrupt.  If there was already anything
     // in the buffer this will already be enabled, but enabling
     // it again doesn't hurt anything.
-    reg->ctrl1.txeie = 1;
-
+    reg->ctrl1.s.txeie = 1;
     return i;
   }
 
@@ -625,7 +624,7 @@ static void InitUARTs() {
 }
 
 static void UART2_ISR() { dbgUART.ISR(); }
-// static void UART3_ISR() { rpUART.ISR(); }
+// void UART3_ISR() { rpUART.ISR(); }
 
 uint16_t HalApi::serialRead(char *buf, uint16_t len) {
   return rpUART.read(buf, len);
